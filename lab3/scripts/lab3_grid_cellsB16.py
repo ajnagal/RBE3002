@@ -4,8 +4,9 @@ import rospy
 from nav_msgs.msg import GridCells
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist, Point, PointStamped, Pose, PoseStamped, PoseWithCovarianceStamped
-from nav_msgs.msg import Odometry, OccupancyGrid
+from nav_msgs.msg import Odometry, OccupancyGrid, Path
 from kobuki_msgs.msg import BumperEvent
+from rdp import rdp
 import tf
 import numpy
 import math 
@@ -105,9 +106,22 @@ def star():
         temp.y = tup_path[i][1]
         temp.z = 0
         point_path.append(temp)
+
     print point_path
     # Publish points
     publishPath(point_path)
+
+    way_path= []
+    tup_path = rdp(tup_path, epsilon=0.5)
+    for i in range(0, len(tup_path)):
+        temp = Point()
+        temp.x = tup_path[i][0]
+        temp.y = tup_path[i][1]
+        temp.z = 0
+        way_path.append(temp)
+
+    print way_path
+    publishWaypoints(way_path)
     print "Astar Complete!"
 
 #publishes map to rviz using gridcells type
@@ -156,15 +170,44 @@ def publishPath(points):
         cells.cells.append(point)
     pubpath.publish(cells)
 
+def publishWaypoints(points):
+    global pubway
+    print "Publishing Waypoints"
+    k=0
+    cells = GridCells()
+    cells.header.frame_id = 'map'
+    cells.cell_width = resolution
+    cells.cell_height = resolution
+
+    waypoints = Path()
+    waypoints.header.frame_id = 'map'
+
+    for i in range(0,len(points)):
+        point=Point()
+        point.x = (points[i].x * resolution) + offsetX + (.5 * resolution)
+        point.y = (points[i].y * resolution) + offsetY + (.5 * resolution)
+        point.z=0
+        cells.cells.append(point)
+        temp = PoseStamped()
+        temp.pose.position.x = point.x
+        temp.pose.position.y = point.y
+        #temp.pose.orientation.z = 0
+        waypoints.poses.append(temp)
+
+    pubway.publish(waypoints)
+
+
+
 #Main handler of the project
 def run():
     global pub
     global pubpath
+    global pubway
     rospy.init_node('lab3')
     sub = rospy.Subscriber("/map", OccupancyGrid, mapCallBack)
     pub = rospy.Publisher("/map_check", GridCells, queue_size=1)  
     pubpath = rospy.Publisher("/path", GridCells, queue_size=1) # you can use other types if desired
-    pubway = rospy.Publisher("/waypoints", GridCells, queue_size=1)
+    pubway = rospy.Publisher("/waypoints", Path, queue_size=1)
     goal_sub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, readGoal, queue_size=1) #change topic for best results
     start_sub = rospy.Subscriber('/clicked_point', PointStamped, readStart, queue_size=1) #change topic for best results
 
