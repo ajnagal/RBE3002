@@ -3,7 +3,7 @@
 import rospy
 from nav_msgs.msg import GridCells
 from std_msgs.msg import String
-from geometry_msgs.msg import Twist, Point, Pose, PoseStamped, PoseWithCovarianceStamped
+from geometry_msgs.msg import Twist, Point, PointStamped, Pose, PoseStamped, PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry, OccupancyGrid
 from kobuki_msgs.msg import BumperEvent
 import tf
@@ -42,8 +42,8 @@ def readGoal(goal):
     global resolution
     goalX= goal.pose.position.x
     goalY= goal.pose.position.y
-    goalAX = (goalX - offsetX - (.5 * resolution)) / resolution
-    goalAY = (goalY - offsetY - (.5 * resolution)) / resolution
+    goalAX = (int)((goalX - offsetX - (.5 * resolution)) / resolution)
+    goalAY = (int)((goalY - offsetY - (.5 * resolution)) / resolution)
     print "Goal: "
     print goal.pose
     star()
@@ -60,8 +60,8 @@ def readStart(startPoint):
     global resolution
     startPosX = startPoint.point.x
     startPosY = startPoint.point.y
-    startAX = (startPosX - offsetX - (.5 * resolution))/resolution
-    startAY = (startPosY - offsetY - (.5 * resolution))/resolution
+    startAX = (int)((startPosX - offsetX - (.5 * resolution))/resolution)
+    startAY = (int)((startPosY - offsetY - (.5 * resolution))/resolution)
 
     print "Start: "
     print startPoint.point
@@ -86,7 +86,7 @@ def star():
     #        temp1.append(temp.pop(0))
     #    myMap.append(temp1)
     #    print "Line: " + str(j) + " of " + str(height)
-    numpy.reshape(myMap, (height, width))
+    myMap = numpy.reshape(myMap, (height, width))
 
 
     #readGoal(goal)
@@ -105,8 +105,9 @@ def star():
         temp.y = tup_path[i][1]
         temp.z = 0
         point_path.append(temp)
+    print point_path
     # Publish points
-    publishCells(point_path)
+    publishPath(point_path)
     print "Astar Complete!"
 
 #publishes map to rviz using gridcells type
@@ -135,9 +136,29 @@ def publishCells(grid):
                 cells.cells.append(point)
     pub.publish(cells)           
 
+
+def publishPath(points):
+    global pubpath
+    print "Publishing Path"
+
+    # resolution and offset of the map
+    k=0
+    cells = GridCells()
+    cells.header.frame_id = 'path'
+    cells.cell_width = resolution
+    cells.cell_height = resolution
+
+    for i in range(0,len(points)):
+        point=Point()
+        point.x = (points[i].x * resolution) + offsetX + (.5 * resolution)
+        point.y = (points[i].y * resolution) + offsetY + (.5 * resolution)
+        point.z=0
+        cells.cells.append(point)
+    pubpath.publish(cells)
 #Main handler of the project
 def run():
     global pub
+    global pubpath
     rospy.init_node('lab3')
     sub = rospy.Subscriber("/map", OccupancyGrid, mapCallBack)
     pub = rospy.Publisher("/map_check", GridCells, queue_size=1)  
