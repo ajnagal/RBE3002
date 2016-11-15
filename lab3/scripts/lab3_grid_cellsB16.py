@@ -35,8 +35,15 @@ def mapCallBack(data):
 def readGoal(goal):
     global goalX
     global goalY
+    global goalAX
+    global goalAY
+    global offsetX
+    global offsetY
+    global resolution
     goalX= goal.pose.position.x
     goalY= goal.pose.position.y
+    goalAX = (goalX - offsetX - (.5 * resolution)) / resolution
+    goalAY = (goalY - offsetY - (.5 * resolution)) / resolution
     print "Goal: "
     print goal.pose
     star()
@@ -46,8 +53,16 @@ def readStart(startPoint):
 
     global startPosX
     global startPosY
+    global startAX
+    global startAY
+    global offsetX
+    global offsetY
+    global resolution
     startPosX = startPoint.point.x
     startPosY = startPoint.point.y
+    startAX = (startPosX - offsetX - (.5 * resolution))/resolution
+    startAY = (startPosY - offsetY - (.5 * resolution))/resolution
+
     print "Start: "
     print startPoint.point
 
@@ -60,21 +75,27 @@ def star():
     global width
     global height
     # create a new instance of the map
+    print "In Star..."
     myMap = []
-    temp = mapData
-    for j in range(0, height):
-        temp1 = []
-        for i in range(0, width):
-            temp1.append(temp.pop(0))
-        myMap.append(temp1)
+    myMap = list(mapData)
+    print "Map Len: " + str(len(myMap))
+    #print temp
+    #for j in range(0, height):
+    #    temp1 = []
+    #    for i in range(0, width):
+    #        temp1.append(temp.pop(0))
+    #    myMap.append(temp1)
+    #    print "Line: " + str(j) + " of " + str(height)
+    numpy.reshape(myMap, (height, width))
 
 
     #readGoal(goal)
     #readStart(start)
-    myStart = (startPosX, startPosY)
-    myGoal = (goalX, goalY)
+    myStart = (startAX, startAY)
+    myGoal = (goalAX, goalAY)
 
     # generate a path to the start and end goals by searching through the neighbors, refer to aStar_explanied.py
+    print "starting Astar..."
     tup_path = astar(myMap, myStart, myGoal, 20, 1)
     # for each node in the path, process the nodes to generate GridCells and Path messages
     point_path = []
@@ -86,6 +107,7 @@ def star():
         point_path.append(temp)
     # Publish points
     publishCells(point_path)
+    print "Astar Complete!"
 
 #publishes map to rviz using gridcells type
 
