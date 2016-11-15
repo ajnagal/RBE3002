@@ -1,9 +1,9 @@
-    #!/usr/bin/env python
+#!/usr/bin/env python
 
 import rospy
 from nav_msgs.msg import GridCells
 from std_msgs.msg import String
-from geometry_msgs.msg import Twist, Point, PointStamped, Pose, PoseStamped, PoseWithCovarianceStamped
+from geometry_msgs.msg import Twist, Point, Pose, PoseStamped, PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry, OccupancyGrid
 from kobuki_msgs.msg import BumperEvent
 import tf
