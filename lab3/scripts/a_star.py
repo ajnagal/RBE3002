@@ -1,15 +1,16 @@
 
 import numpy
+import math
 from heapq import *
 
 
 def heuristic(a, b):
     #print("a: ", a,"b: ", b)
-    return (b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2
+    return math.sqrt(abs(b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
 
 def astar(array, start, goal, wall_value, step):
     print("Start is:", start, "goal is", goal)
-    #array = numpy.swapaxes(array,0,1)
+    array = numpy.swapaxes(array,0,1)
     neighbors = [(0,step),(0,-step),(step,0),(-step,0)]
 
     close_set = set()
