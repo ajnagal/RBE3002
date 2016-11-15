@@ -10,7 +10,7 @@ def heuristic(a, b):
 def astar(array, start, goal, wall_value, step):
     print("Start is:", start, "goal is", goal)
     array = numpy.swapaxes(array,0,1)
-    neighbors = [(0,step),(0,-step),(step,0),(-step,0),(step,step),(step,-step),(-step,step),(-step,-step)]
+    neighbors = [(0,step),(0,-step),(step,0),(-step,0)]
 
     close_set = set()
     came_from = {}
@@ -58,22 +58,3 @@ def astar(array, start, goal, wall_value, step):
                 heappush(oheap, (fscore[neighbor], neighbor))
                 
     return False
-
-'''Here is an example of using my algo with a numpy array,
-   astar(array, start, destination)
-   astar function returns a list of points (shortest path)'''
-
-nmap = numpy.array([
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    ['a','a','a','a','a','a','a','a','a','a','a','a',0,'a'],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    ['a','a','a','a','a','a','a',0,'a','a','a','a','a','a'],
-    [0,0,0,'a',0,0,0,0,0,0,0,0,0,0],
-    ['a','a','a','a',0,'a','a','a','a','a','a','a',0,'a'],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    ['a',0,'a','a','a','a','a','a','a','a','a','a','a','a'],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    ['a','a','a','a','a','a','a','a','a','a','a','a',0,'a'],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0]])
-    
-#print (type(numpy.array(astar(nmap, (0,0), (10,13),'a'))))
