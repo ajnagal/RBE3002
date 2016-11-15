@@ -144,7 +144,7 @@ def publishPath(points):
     # resolution and offset of the map
     k=0
     cells = GridCells()
-    cells.header.frame_id = 'path'
+    cells.header.frame_id = 'map'
     cells.cell_width = resolution
     cells.cell_height = resolution
 

@@ -9,7 +9,7 @@ def heuristic(a, b):
 
 def astar(array, start, goal, wall_value, step):
     print("Start is:", start, "goal is", goal)
-    #array = numpy.swapaxes(array,0,1)
+    array = numpy.swapaxes(array,0,1)
     neighbors = [(0,step),(0,-step),(step,0),(-step,0)]
 
     close_set = set()
