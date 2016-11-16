@@ -9,8 +9,8 @@ from scipy.spatial import distance
 def astar(grid, start, goal, wall_value, step):
     print("Start is:", start, "goal is", goal)
     grid = numpy.swapaxes(grid,0,1)
-    adj = [(0,step),(0,-step),(step,0),(-step,0)]
-    fscore = {start:distance(start, goal)}
+    adj = [(0,step),(step, step),(0,-step),(step, -step),(step,0),(-step, step), (-step,0),(-step, -step)]
+    fscore = {start:distance.euclidean(start, goal)}
     gscore = {start: 0}
     pile = []
     visited = set()
@@ -23,14 +23,14 @@ def astar(grid, start, goal, wall_value, step):
         if curNode == goal: #If the current node is the goal...
             path = []
             while curNode in cameFrom: #extract the path that lead to it
-                path.append(current)
-                current = cameFrom[current]
+                path.append(curNode)
+                curNode = cameFrom[curNode]
             return path
 
         visited.add(curNode)
         for i, j in adj:
             neighbor = curNode[0] + i, curNode[1] + j
-            AproxGscore = gscore[curNode] + distance(curNode, neighbor)
+            AproxGscore = gscore[curNode] + distance.euclidean(curNode, neighbor)
             if 0 <= neighbor[0] < grid.shape[0]:
                 if 0 <= neighbor[1] < grid.shape[1]:
                     #print(array[neighbor[0]][neighbor[1]])
@@ -49,9 +49,9 @@ def astar(grid, start, goal, wall_value, step):
                 
             if AproxGscore < gscore.get(neighbor, 0) or neighbor not in [i[1]for i in pile]:
                 #If not calculate the neighbors values and add to heap
-                visited[neighbor] = curNode
+                cameFrom[neighbor] = curNode
                 gscore[neighbor] = AproxGscore
-                fscore[neighbor] = AproxGscore + distance(neighbor, goal)
+                fscore[neighbor] = AproxGscore + distance.euclidean(neighbor, goal)
                 heappush(pile, (fscore[neighbor], neighbor))
                 
     return False #If no path could be found (this can take a while)
