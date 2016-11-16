@@ -1,5 +1,4 @@
 #Originally written for RBE 2002 by Marek Travnikar and Toby Maculoso
-
 import numpy, math
 from heapq import *
 from scipy.spatial import distance
