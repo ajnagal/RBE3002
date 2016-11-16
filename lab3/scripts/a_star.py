@@ -1,60 +1,58 @@
+#Originally written for RBE 2002 by Marek Travnikar and Toby Maculoso
 
-import numpy
+import numpy, math
 from heapq import *
+from scipy.spatial import distance
 
-
-def heuristic(a, b):
-    #print("a: ", a,"b: ", b)
-    return (b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2
-
-def astar(array, start, goal, wall_value, step):
+#Takes the grid (map), start location, goal location,
+# values to treat as walls (anything above that value)
+# step size (to skip over some adj spaces for faster calc
+def astar(grid, start, goal, wall_value, step):
     print("Start is:", start, "goal is", goal)
-    array = numpy.swapaxes(array,0,1)
-    neighbors = [(0,step),(0,-step),(step,0),(-step,0)]
-
-    close_set = set()
-    came_from = {}
-    gscore = {start:0}
-    fscore = {start:heuristic(start, goal)}
-    oheap = []
-
-    heappush(oheap, (fscore[start], start))
+    grid = numpy.swapaxes(grid,0,1)
+    adj = [(0,step),(0,-step),(step,0),(-step,0)]
+    fscore = {start:distance(start, goal)}
+    gscore = {start: 0}
+    pile = []
+    visited = set()
+    cameFrom = {}
+    heappush(pile, (fscore[start], start))
     
-    while oheap:
+    while pile: #While nodes exist in the heap (grid not fully explored
+        curNode = heappop(pile)[1]
 
-        current = heappop(oheap)[1]
+        if curNode == goal: #If the current node is the goal...
+            path = []
+            while curNode in cameFrom: #extract the path that lead to it
+                path.append(current)
+                current = cameFrom[current]
+            return path
 
-        if current == goal:
-            data = []
-            while current in came_from:
-                data.append(current)
-                current = came_from[current]
-            return data
-
-        close_set.add(current)
-        for i, j in neighbors:
-            neighbor = current[0] + i, current[1] + j            
-            tentative_g_score = gscore[current] + heuristic(current, neighbor)
-            if 0 <= neighbor[0] < array.shape[0]:
-                if 0 <= neighbor[1] < array.shape[1]:
+        visited.add(curNode)
+        for i, j in adj:
+            neighbor = curNode[0] + i, curNode[1] + j
+            AproxGscore = gscore[curNode] + distance(curNode, neighbor)
+            if 0 <= neighbor[0] < grid.shape[0]:
+                if 0 <= neighbor[1] < grid.shape[1]:
                     #print(array[neighbor[0]][neighbor[1]])
                     #if array[neighbor[0]][neighbor[1]] == wall_value:
-                    if array[neighbor[0]][neighbor[1]] >= wall_value or array[neighbor[0]][neighbor[1]] == -1:
+                    if grid[neighbor[0]][neighbor[1]] >= wall_value or grid[neighbor[0]][neighbor[1]] == -1:
                         continue
                 else:
-                    # array bound y walls
+                    # Escape if currNode is at a y wall
                     continue
             else:
-                # array bound x walls
+                # Escape if the currNode is at an x wall
                 continue
                 
-            if neighbor in close_set and tentative_g_score >= gscore.get(neighbor, 0):
-                continue
+            if neighbor in visited and AproxGscore >= gscore.get(neighbor, 0):
+                continue #if the neighbor has been visited and the current node costs more to get to
                 
-            if  tentative_g_score < gscore.get(neighbor, 0) or neighbor not in [i[1]for i in oheap]:
-                came_from[neighbor] = current
-                gscore[neighbor] = tentative_g_score
-                fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal)
-                heappush(oheap, (fscore[neighbor], neighbor))
+            if AproxGscore < gscore.get(neighbor, 0) or neighbor not in [i[1]for i in pile]:
+                #If not calculate the neighbors values and add to heap
+                visited[neighbor] = curNode
+                gscore[neighbor] = AproxGscore
+                fscore[neighbor] = AproxGscore + distance(neighbor, goal)
+                heappush(pile, (fscore[neighbor], neighbor))
                 
-    return False
+    return False #If no path could be found (this can take a while)

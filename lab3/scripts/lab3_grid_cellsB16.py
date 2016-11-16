@@ -155,6 +155,7 @@ def publishPath(points):
         point.z=0
         cells.cells.append(point)
     pubpath.publish(cells)
+
 #Main handler of the project
 def run():
     global pub
