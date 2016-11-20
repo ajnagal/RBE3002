@@ -5,7 +5,7 @@ from kobuki_msgs.msg import BumperEvent
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, PointStamped
 from tf.transformations import euler_from_quaternion
 
 xPosition = 0
@@ -14,26 +14,34 @@ theta = 0
 
 #drive to a goal subscribed as /move_base_simple/goal
 def navToPose(goal):
-
-    dx = goal.pose.position.x
-    dy = goal.pose.position.y
+    global ddist
+    global da
+    dx = goal.point.x
+    dy = goal.point.y
     print "dx ", dx
     print "dy ", dy
 
     da = math.degrees(math.atan2(dy,dx))
-    print "spin!" , da
-    rotate(da)
 
-    dist = math.sqrt(dx**2+dy**2)
-    print "move!", dist
-    driveStraight(dist,0.25)
 
-    print "spin"
-    rotate(goal.pose.orientation.z-da)
+    ddist = math.sqrt(dx**2+dy**2)
 
-    print "done"
 
-    pass
+def continousNav():
+    global ddist
+    global da
+
+    if(abs(da) > pi/8):
+        print "spin!" , da
+        if da > 0
+            publishTwist(0,.2)
+        else:
+            publishTwist(0,-.2)
+    elif(ddist > 0):
+        publishTwist(.2,0)
+        print "move!", ddist
+    else:
+        publishTwist(0,0)
 
 
 #This function sequentially calls methods to perform a trajectory.
@@ -97,8 +105,6 @@ def driveStraight(distance, speed):
             else: 
                 publishTwist(speed,0)
                 rospy.sleep(0.15)
-
-
 
 
 
@@ -229,7 +235,7 @@ if __name__ == '__main__':
     bumper_sub = rospy.Subscriber('mobile_base/events/bumper', BumperEvent, readBumper, queue_size=1) # Callback function to handle bumper events
 
 
-    position_sub = rospy.Subscriber('/lab4_goal', PoseStamped, navToPose)
+    position_sub = rospy.Subscriber('/lab4_goal', PointStamped, navToPose)
     # Use this object to get the robot's Odometry 
     odom_list = tf.TransformListener()
     
@@ -240,15 +246,8 @@ if __name__ == '__main__':
 
     #make the robot keep doing something...
     rospy.Timer(rospy.Duration(.01), timerCallback)
-    rospy.spin();
-    #while(1):
-    #    rospy.sleep(.1)
-    # Make the robot do stuff...
-    #spinWheels(-.1,-.25,2)
-    #executeTrajectory()
-    #print "x: ", xPosition, " y: ", yPosition , " theta: ", theta
-    #navToPose([1,1])
-    #driveStraight(1,.1)
-    #print "x: ", xPosition, " y: ", yPosition , " theta: ", theta
-    #print "Lab 2 complete!"
+    while (1 and not rospy.is_shutdown()):
+        continousNav()
+        rospy.sleep(.1) 
+        print("Complete")
 

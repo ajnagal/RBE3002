@@ -11,7 +11,7 @@ def run():
 
 
     subway = rospy.Subscriber("/waypoints", Path, pointCallBack)
-    pubgoal = rospy.Publisher("/lab4_goal", Pose_Stamped)
+    pubgoal = rospy.Publisher("/lab4_goal", Point_Stamped)
     pubpose = rospy.Publisher("/lab4_pose", Point_Stamped)
 
     # wait a second for publisher, subscribers, and TF
