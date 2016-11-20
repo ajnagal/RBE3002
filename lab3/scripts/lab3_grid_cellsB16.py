@@ -62,8 +62,8 @@ def readStart(startPoint):
     global offsetX
     global offsetY
     global resolution
-    startPosX = startPoint.point.x
-    startPosY = startPoint.point.y
+    startPosX = startPoint.x
+    startPosY = startPoint.y
     startAX = (int)((startPosX - offsetX - (.5 * resolution))/resolution)
     startAY = (int)((startPosY - offsetY - (.5 * resolution))/resolution)
 
@@ -219,7 +219,7 @@ def run():
     pubpath = rospy.Publisher("/path", GridCells, queue_size=1) # you can use other types if desired
     pubway = rospy.Publisher("/waypoints", Path, queue_size=1)
     goal_sub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, readGoal, queue_size=1) #change topic for best results
-    start_sub = rospy.Subscriber('/lab4_pose', PointStamped, readStart, queue_size=1) #change topic for best results
+    start_sub = rospy.Subscriber('/lab4_pose', Point, readStart, queue_size=1) #change topic for best results
 
     # wait a second for publisher, subscribers, and TF
     rospy.sleep(1)

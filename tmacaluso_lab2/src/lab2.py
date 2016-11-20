@@ -197,7 +197,8 @@ def getOdomData():
 def odomCallback(data):
     global xPosition
     global yPosition
-    global theta 
+    global theta
+
 
     xPosition = data.pose.pose.position.x
     yPosition = data.pose.position.y
@@ -205,6 +206,10 @@ def odomCallback(data):
     q = [quat.x, quat.y, quat.z, quat.w]
     roll, pitch, yaw = euler_from_quaternion(q)
     theta = math.degrees(yaw)
+    curPoint = Point()
+    curPoint.x = xPosition
+    curPoint.y = yPosition
+    pubcur(curPoint)
 
 
 
@@ -227,7 +232,7 @@ if __name__ == '__main__':
     # Replace the elipses '...' in the following lines to set up the publishers and subscribers the lab requires
     pub = rospy.Publisher('cmd_vel_mux/input/teleop',Twist) # Publisher for commanding robot motion
     bumper_sub = rospy.Subscriber('mobile_base/events/bumper', BumperEvent, readBumper, queue_size=1) # Callback function to handle bumper events
-
+    pubcur = rospy.Publisher('/lab4_cur', Point)
 
     position_sub = rospy.Subscriber('/lab4_goal', PoseStamped, navToPose)
     # Use this object to get the robot's Odometry 
