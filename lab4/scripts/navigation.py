@@ -19,6 +19,7 @@ def run():
     subway = rospy.Subscriber("/waypoints", Path, pointCallBack)
     pubpose = rospy.Publisher("/lab4_pose", Point)
 
+
     # wait a second for publisher, subscribers, and TF
     rospy.sleep(1)
 
