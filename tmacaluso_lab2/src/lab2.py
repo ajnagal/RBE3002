@@ -219,7 +219,7 @@ if __name__ == '__main__':
     bumper_sub = rospy.Subscriber('mobile_base/events/bumper', BumperEvent, readBumper, queue_size=1) # Callback function to handle bumper events
 
 
-    position_sub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, navToPose)
+    position_sub = rospy.Subscriber('/lab4_goal', PoseStamped, navToPose)
     # Use this object to get the robot's Odometry 
     odom_list = tf.TransformListener()
     

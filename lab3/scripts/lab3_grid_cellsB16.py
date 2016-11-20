@@ -211,13 +211,15 @@ def run():
     global pub
     global pubpath
     global pubway
+
     rospy.init_node('lab3')
-    sub = rospy.Subscriber("/map", OccupancyGrid, mapCallBack)
+    rospy.set_param("/move_base/global_costmap/inflation_layer/inflation_radius", "0.15")
+    sub = rospy.Subscriber("/move_base/global_costmap/costmap", OccupancyGrid, mapCallBack)
     pub = rospy.Publisher("/map_check", GridCells, queue_size=1)  
     pubpath = rospy.Publisher("/path", GridCells, queue_size=1) # you can use other types if desired
     pubway = rospy.Publisher("/waypoints", Path, queue_size=1)
     goal_sub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, readGoal, queue_size=1) #change topic for best results
-    start_sub = rospy.Subscriber('/clicked_point', PointStamped, readStart, queue_size=1) #change topic for best results
+    start_sub = rospy.Subscriber('/lab4_pose', PointStamped, readStart, queue_size=1) #change topic for best results
 
     # wait a second for publisher, subscribers, and TF
     rospy.sleep(1)
