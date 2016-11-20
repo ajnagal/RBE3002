@@ -12,7 +12,6 @@ def curCallBack(point):
 #Main handler of the project
 def run():
     global nextPoint
-    global pubgoal
     global pubpose
     global curPoint
 
@@ -25,7 +24,7 @@ def run():
 
     while (1 and not rospy.is_shutdown()):
         pubpose.publish(curPoint) #publishing map data every 2 seconds
-        rospy.sleep(2) 
+        rospy.sleep(2)
         print("Complete")
 
 # This is the program's main function
