@@ -76,11 +76,12 @@ def spinWheels(u1, u2, time):
 def driveStraight(distance, speed):
     global xPosition
     global yPosition
+    global b_stop
 
     initialX = xPosition
     initialY = yPosition
     atTarget = False
-    while (not atTarget and not rospy.is_shutdown()):
+    while (not atTarget and not rospy.is_shutdown() and not b_stop):
         currentX = xPosition
         currentY = yPosition
         currentDistance = math.sqrt((currentX-initialX)**2 + (currentY-initialY)**2)
@@ -151,14 +152,20 @@ def driveArc(radius, speed, angle):
 
 #Bumper Event Callback function
 def readBumper(msg):
+    global b_stop
     if (msg.state == 1):
+        b_stop = 1
+        print "Ouch!"
+    else:
+        b_stop = 0
+    #if (msg.state == 1):
         #spinWheels(-.1,-.25,2)
         # navToPose([0,.2,0])
         #rospy.sleep(1)
         #navToPose([.2,.2])
         #rospy.sleep(1)
         # executeTrajectory()
-        print "x: ", xPosition, " y: ", yPosition , " theta: ", theta
+        #print "x: ", xPosition, " y: ", yPosition , " theta: ", theta
         
 
 
@@ -212,6 +219,9 @@ if __name__ == '__main__':
     global theta
     global odom_tf
     global odom_list
+    global b_stop
+
+    b_stop = 0
 
     
     # Replace the elipses '...' in the following lines to set up the publishers and subscribers the lab requires
@@ -230,14 +240,15 @@ if __name__ == '__main__':
 
     #make the robot keep doing something...
     rospy.Timer(rospy.Duration(.01), timerCallback)
-    while(1):
-        rospy.sleep(.1)
+    rospy.spin();
+    #while(1):
+    #    rospy.sleep(.1)
     # Make the robot do stuff...
     #spinWheels(-.1,-.25,2)
     #executeTrajectory()
-    print "x: ", xPosition, " y: ", yPosition , " theta: ", theta
-    navToPose([1,1])
+    #print "x: ", xPosition, " y: ", yPosition , " theta: ", theta
+    #navToPose([1,1])
     #driveStraight(1,.1)
-    print "x: ", xPosition, " y: ", yPosition , " theta: ", theta
-    print "Lab 2 complete!"
+    #print "x: ", xPosition, " y: ", yPosition , " theta: ", theta
+    #print "Lab 2 complete!"
 
