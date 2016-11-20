@@ -1,7 +1,13 @@
 #Originally written for RBE 2002 by Marek Travnikar and Toby Maculoso
 import numpy, math
 from heapq import *
-from scipy.spatial import distance
+
+
+def dist(cur, end):
+    dx = cur[0] - end[0]
+    dy = cur[1] - end[1]
+    return math.sqrt(dx**2 + dy**2)
+
 
 #Takes the grid (map), start location, goal location,
 # values to treat as walls (anything above that value)
@@ -10,7 +16,7 @@ def astar(grid, start, goal, wall_value, step):
     print("Start is:", start, "goal is", goal)
     grid = numpy.swapaxes(grid,0,1)
     adj = [(0,step),(step, step),(0,-step),(step, -step),(step,0),(-step, step), (-step,0),(-step, -step)]
-    fscore = {start:distance.euclidean(start, goal)}
+    fscore = {start:dist(start, goal)}
     gscore = {start: 0}
     pile = []
     visited = set()
@@ -30,7 +36,7 @@ def astar(grid, start, goal, wall_value, step):
         visited.add(curNode)
         for i, j in adj:
             neighbor = curNode[0] + i, curNode[1] + j
-            AproxGscore = gscore[curNode] + distance.euclidean(curNode, neighbor)
+            AproxGscore = gscore[curNode] + dist(curNode, neighbor)
             if 0 <= neighbor[0] < grid.shape[0]:
                 if 0 <= neighbor[1] < grid.shape[1]:
                     #print(array[neighbor[0]][neighbor[1]])
@@ -51,7 +57,7 @@ def astar(grid, start, goal, wall_value, step):
                 #If not calculate the neighbors values and add to heap
                 cameFrom[neighbor] = curNode
                 gscore[neighbor] = AproxGscore
-                fscore[neighbor] = AproxGscore + distance.euclidean(neighbor, goal)
+                fscore[neighbor] = AproxGscore + dist(neighbor, goal)
                 heappush(pile, (fscore[neighbor], neighbor))
                 
     return False #If no path could be found (this can take a while)

@@ -34,6 +34,7 @@ def mapCallBack(data):
     print data.info
 
 def readGoal(goal):
+    global startPosX
     global goalX
     global goalY
     global goalAX
@@ -47,11 +48,13 @@ def readGoal(goal):
     goalAY = (int)((goalY - offsetY - (.5 * resolution)) / resolution)
     print "Goal: "
     print goal.pose
-    star()
+    if 'startPosX' in globals():
+        star()
 
 
 def readStart(startPoint):
 
+    global goalX
     global startPosX
     global startPosY
     global startAX
@@ -66,6 +69,8 @@ def readStart(startPoint):
 
     print "Start: "
     print startPoint.point
+    if 'goalX' in globals():
+        star()
 
 def star():
     global mapData
@@ -98,27 +103,30 @@ def star():
     # generate a path to the start and end goals by searching through the neighbors, refer to aStar_explanied.py
     print "starting Astar..."
     tup_path = astar(myMap, myStart, myGoal, 20, 1)
-    # for each node in the path, process the nodes to generate GridCells and Path messages
     point_path = []
-    for i in range(0, len(tup_path)):
-        temp = Point()
-        temp.x = tup_path[i][0]
-        temp.y = tup_path[i][1]
-        temp.z = 0
-        point_path.append(temp)
+    way_path= []
+    if(tup_path):
+        # for each node in the path, process the nodes to generate GridCells and Path messages
+        for i in range(0, len(tup_path)):
+            temp = Point()
+            temp.x = tup_path[i][0]
+            temp.y = tup_path[i][1]
+            temp.z = 0
+            point_path.append(temp)
 
+
+        tup_path = rdp(tup_path, epsilon=0.5)
+        for i in range(0, len(tup_path)):
+            temp = Point()
+            temp.x = tup_path[i][0]
+            temp.y = tup_path[i][1]
+            temp.z = 0
+            way_path.append(temp)
+    else:
+        print "WARNING: No path found"
     print point_path
     # Publish points
     publishPath(point_path)
-
-    way_path= []
-    tup_path = rdp(tup_path, epsilon=0.5)
-    for i in range(0, len(tup_path)):
-        temp = Point()
-        temp.x = tup_path[i][0]
-        temp.y = tup_path[i][1]
-        temp.z = 0
-        way_path.append(temp)
 
     print way_path
     publishWaypoints(way_path)
