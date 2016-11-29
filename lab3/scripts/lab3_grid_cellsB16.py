@@ -217,8 +217,8 @@ def run():
     sub = rospy.Subscriber("/move_base/global_costmap/costmap", OccupancyGrid, mapCallBack)
     pub = rospy.Publisher("/map_check", GridCells, queue_size=1)  
     pubpath = rospy.Publisher("/path", GridCells, queue_size=1) # you can use other types if desired
-    pubway = rospy.Publisher("/waypoints", Path, queue_size=1)
-    goal_sub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, readGoal, queue_size=1) #change topic for best results
+    pubway = rospy.Publisher("/move_base/NavfnROS/plan", Path, queue_size=1)
+    goal_sub = rospy.Subscriber('/goal', PoseStamped, readGoal, queue_size=1) #change topic for best results
     start_sub = rospy.Subscriber('/lab4_pose', Point, readStart, queue_size=1) #change topic for best results
 
     # wait a second for publisher, subscribers, and TF

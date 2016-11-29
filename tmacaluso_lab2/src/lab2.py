@@ -8,9 +8,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped, PointStamped
 from tf.transformations import euler_from_quaternion
 
-xPosition = 0
-yPosition = 0
-theta = 0
+
 
 #drive to a goal subscribed as /move_base_simple/goal
 def navToPose(goal):
@@ -31,9 +29,9 @@ def continousNav():
     global ddist
     global da
 
-    if(abs(da) > pi/8):
+    if(abs(da) > 3.1415/8):
         print "spin!" , da
-        if da > 0
+        if da > 0:
             publishTwist(0,.2)
         else:
             publishTwist(0,-.2)
@@ -231,14 +229,20 @@ if __name__ == '__main__':
     global odom_tf
     global odom_list
     global b_stop
+    global da
+    global ddist
 
     b_stop = 0
-
+    da = 0
+    ddist = 0
+    xPosition = 0
+    yPosition = 0
+    theta = 0
     
     # Replace the elipses '...' in the following lines to set up the publishers and subscribers the lab requires
-    pub = rospy.Publisher('cmd_vel_mux/input/teleop',Twist) # Publisher for commanding robot motion
+    pub = rospy.Publisher('cmd_vel_mux/input/teleop',Twist, queue_size = 1) # Publisher for commanding robot motion
     bumper_sub = rospy.Subscriber('mobile_base/events/bumper', BumperEvent, readBumper, queue_size=1) # Callback function to handle bumper events
-    pubcur = rospy.Publisher('/lab4_cur', Point)
+    pubcur = rospy.Publisher('/lab4_cur', PointStamped, queue_size=1)
 
     position_sub = rospy.Subscriber('/lab4_goal', PointStamped, navToPose)
     # Use this object to get the robot's Odometry 
