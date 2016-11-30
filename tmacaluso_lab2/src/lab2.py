@@ -5,22 +5,38 @@ from kobuki_msgs.msg import BumperEvent
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PoseStamped, PointStamped
+from geometry_msgs.msg import PoseStamped, PointStamped, Point
 from tf.transformations import euler_from_quaternion
 
 
 
 #drive to a goal subscribed as /move_base_simple/goal
 def navToPose(goal):
+    global theta
+    global xPosition
+    global yPosition
     global ddist
     global da
-    dx = goal.point.x
-    dy = goal.point.y
-    print "dx ", dx
-    print "dy ", dy
 
-    da = math.degrees(math.atan2(dy,dx))
+    if(goal.point.x == 0 and goal.point.y == 0):
+        dx = 0
+        dy = 0
+        da = 0
+        print "no path"
+    else:
+        dx = goal.point.x - xPosition
+        dy = goal.point.y - yPosition
+        print "dx ", dx
+        print "dy ", dy
 
+        da = theta - math.degrees(math.atan2(dy,dx))
+        if da > 180:
+            da = da - 360
+        if da< -180:
+            da = da + 360
+
+        print "theta ", theta
+        print "da ", da
 
     ddist = math.sqrt(dx**2+dy**2)
 
@@ -29,13 +45,13 @@ def continousNav():
     global ddist
     global da
 
-    if(abs(da) > 3.1415/8):
+    if(abs(da) > 8):
         print "spin!" , da
         if da > 0:
-            publishTwist(0,.2)
+            publishTwist(0,-.4)
         else:
-            publishTwist(0,-.2)
-    elif(ddist > 0):
+            publishTwist(0,.4)
+    elif(ddist > .1):
         publishTwist(.2,0)
         print "move!", ddist
     else:
@@ -238,13 +254,12 @@ if __name__ == '__main__':
     xPosition = 0
     yPosition = 0
     theta = 0
-    
+
     # Replace the elipses '...' in the following lines to set up the publishers and subscribers the lab requires
     pub = rospy.Publisher('cmd_vel_mux/input/teleop',Twist, queue_size = 1) # Publisher for commanding robot motion
     bumper_sub = rospy.Subscriber('mobile_base/events/bumper', BumperEvent, readBumper, queue_size=1) # Callback function to handle bumper events
-    pubcur = rospy.Publisher('/lab4_cur', PointStamped, queue_size=1)
-
-    position_sub = rospy.Subscriber('/lab4_goal', PointStamped, navToPose)
+    #pubcur = rospy.Publisher('/lab4_pose', Point, queue_size=1)
+    position_sub = rospy.Subscriber('/next_goal', PointStamped, navToPose)
     # Use this object to get the robot's Odometry 
     odom_list = tf.TransformListener()
     
@@ -254,9 +269,9 @@ if __name__ == '__main__':
     print "Starting Lab 2"
 
     #make the robot keep doing something...
-    rospy.Timer(rospy.Duration(.01), timerCallback)
+    rospy.Timer(rospy.Duration(.1), timerCallback)
     while (1 and not rospy.is_shutdown()):
         continousNav()
-        rospy.sleep(.1) 
+        rospy.sleep(.5)
         print("Complete")
 
