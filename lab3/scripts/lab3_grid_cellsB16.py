@@ -5,6 +5,7 @@ from nav_msgs.msg import GridCells
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist, Point, PointStamped, Pose, PoseStamped, PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry, OccupancyGrid, Path
+from map_msgs.msg import OccupancyGridUpdate
 from kobuki_msgs.msg import BumperEvent
 from rdp import rdp
 import tf
@@ -15,6 +16,15 @@ from a_star import astar
 
 
 
+def updateGrid(dataPack):
+    global mapData
+    global width
+    global height
+    temp = list(mapData)
+
+    for i in range(0, len(dataPack.data)):
+        temp[(width*dataPack.y)+dataPack.x + i] = dataPack.data[i]
+    mapData = tuple(temp)
 # reads in global map
 def mapCallBack(data):
     global mapData
@@ -68,7 +78,7 @@ def readStart(startPoint):
     startAY = (int)((startPosY - offsetY - (.5 * resolution))/resolution)
 
     print "Start: "
-    print startPoint.point
+    print startPoint
     if 'goalX' in globals():
         star()
 
@@ -115,13 +125,14 @@ def star():
             point_path.append(temp)
 
 
-        tup_path = rdp(tup_path, epsilon=0.5)
+        tup_path = rdp(tup_path, epsilon=0.25)
         for i in range(0, len(tup_path)):
             temp = Point()
             temp.x = tup_path[i][0]
             temp.y = tup_path[i][1]
             temp.z = 0
             way_path.append(temp)
+
     else:
         print "WARNING: No path found"
     print point_path
@@ -215,6 +226,7 @@ def run():
     rospy.init_node('lab3')
     rospy.set_param("/move_base/global_costmap/inflation_layer/inflation_radius", "0.15")
     sub = rospy.Subscriber("/move_base/global_costmap/costmap", OccupancyGrid, mapCallBack)
+    subUp = rospy.Subscriber("/move_base/global_costmap/costmap_updates", OccupancyGridUpdate, updateGrid)
     pub = rospy.Publisher("/map_check", GridCells, queue_size=1)  
     pubpath = rospy.Publisher("/path", GridCells, queue_size=1) # you can use other types if desired
     pubway = rospy.Publisher("/move_base/NavfnROS/plan", Path, queue_size=1)
