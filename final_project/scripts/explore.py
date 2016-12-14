@@ -6,77 +6,93 @@ from geometry_msgs.msg import Twist, Point, PointStamped, Pose, PoseStamped, Pos
 from nav_msgs.msg import Odometry, OccupancyGrid, Path
 from kobuki_msgs.msg import BumperEvent
 import rospy, tf, numpy, math
-from heapq import *
+from find_frontiers import find_frontiers
 
 def mapCallBack(data):
-    global pubpath
+    global mapData
     global pubgoal
-    goal = find_frontiers()
+    global xPosition
+    global yPosition
+
+
+    myMap = []
+    myMap = list(mapData)
+    myStart = (xPosition, yPosition)
+
+    goal = find_frontiers(myStart, myMap, 20, 5,1)
     if(goal == False):
         print "done"
     else :
         pubgoal(goal)
 
 
-def findFrontiers(start, grid, wall_value, unknown_value):
-    print("Start is:", start)
-    grid = numpy.swapaxes(grid,0,1)
-    adj = [(0,step),(step, step),(0,-step),(step, -step),(step,0),(-step, step), (-step,0),(-step, -step)]
-    gscore = {start: 0}
-    pile = []
-    visited = set()
-    cameFrom = {}
-    heappush(pile, (0, start))
-    
-    while pile: #While nodes exist in the heap (grid not fully explored
-        curNode = heappop(pile)[1]
+#Accepts an angle and makes the robot rotate around it.
+def rotate(angle):
+    global theta
 
-        if grid[curNode[0], curNode[1]] >= unknown_value : #If the current node is the goal...
-            return curNode
-
-        visited.add(curNode)
-        for i, j in adj:
-            neighbor = curNode[0] + i, curNode[1] + j
-            AproxGscore = gscore[curNode] + dist(curNode, neighbor)
-            if 0 <= neighbor[0] < grid.shape[0]:
-                if 0 <= neighbor[1] < grid.shape[1]:
-                    #print(array[neighbor[0]][neighbor[1]])
-                    #if array[neighbor[0]][neighbor[1]] == wall_value:
-                    if grid[neighbor[0]][neighbor[1]] >= wall_value or grid[neighbor[0]][neighbor[1]] == -1:
-                        continue
-                else:
-                    # Escape if currNode is at a y wall
-                    continue
+    initialTheta = theta
+    atTarget = False
+    while (not atTarget and not rospy.is_shutdown()):
+        currentTheta = math.fabs((theta-initialTheta))
+        if(currentTheta > 180):
+            currentTheta = 360 - currentTheta
+        print "angle: ", theta, " curangle: ", currentTheta, " targetangle: ", angle
+        if(currentTheta > math.fabs(angle)):
+            atTarget = True
+            publishTwist(0,0)
+        else:
+            if(angle > 0):
+                publishTwist(0,0.5)
             else:
-                # Escape if the currNode is at an x wall
-                continue
-                
-            if neighbor in visited:
-                continue
-                
-            if AproxGscore < gscore.get(neighbor, 0) or neighbor not in [i[1]for i in pile]:
-                #If not calculate the neighbors values and add to heap
-                cameFrom[neighbor] = curNode
-                gscore[neighbor] = AproxGscore
-                fscore[neighbor] = AproxGscore
-                heappush(pile, (fscore[neighbor], neighbor))
-                
-    return False #If no path could be found (this can take a while)
+                publishTwist(0,-0.5)
+            rospy.sleep(0.15)
+
+# (Optional) If you need something to happen repeatedly at a fixed interval, write the code here.
+# Start the timer with the following line of code: 
+#   rospy.Timer(rospy.Duration(.01), timerCallback)
+def timerCallback(event):
+    global xPosition
+    global yPosition
+    global theta
 
 
+    odom_list.waitForTransform('/odom', 'base_footprint', rospy.Time(0), rospy.Duration(1.0))
+    (position, orientation) = odom_list.lookupTransform('/odom','base_footprint', rospy.Time(0)) 
+
+    xPosition = position[0]
+    yPosition = position[1]
+    quat = orientation
+    q = [quat[0], quat[1], quat[2], quat[3]]
+    roll, pitch, yaw = euler_from_quaternion(q)
+    theta = math.degrees(yaw)
+
+def publishTwist(linearVelocity, angularVelocity):
+    global pub
+
+    msg = Twist()
+    msg.linear.x = linearVelocity
+    msg.angular.z = angularVelocity
+    pub.publish(msg)
 
 #Main handler of the project
 def run():
+    global xPosition
+    global yPosition
+    global theta
     global pub
     global pubgoal
     global pubpath
     global pubway
 
+
+    xPosition = 0
+    yPosition = 0
+    theta = 0
+
     rospy.init_node('lab3')
     rospy.set_param("/move_base/global_costmap/inflation_layer/inflation_radius", "0.15")
     
-    sub = rospy.Subscriber("/move_base/global_costmap/costmap", OccupancyGrid, mapCallBack)
-    pub = rospy.Publisher("/map_check", GridCells, queue_size=1)  
+    pub = rospy.Publisher('cmd_vel_mux/input/teleop',Twist, queue_size = 1) # Publisher for commanding robot motion 
     pubgoal = rospy.Publisher("/clicked_point", Point, queue_size=1) # you can use other types if desired
     #start_sub = rospy.Subscriber('/lab4_pose', Point, readStart, queue_size=1) #change topic for best results
 
@@ -84,7 +100,9 @@ def run():
     rospy.sleep(1)
 
 
-
+    rospy.Timer(rospy.Duration(.1), timerCallback)
+    rotate(360);
+    sub = rospy.Subscriber("/move_base/global_costmap/costmap", OccupancyGrid, mapCallBack)
     while (1 and not rospy.is_shutdown()):
         rospy.sleep(2)  
         print("Complete")
