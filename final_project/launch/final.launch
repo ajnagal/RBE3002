@@ -1,12 +1,12 @@
 <launch>
+    <include file="$(find turtlebot_navigation)/launch/includes/gmapping_demo.launch.xml"/>
     <param name="/move_base/global_costmap/inflation_layer/inflation_raduis" value="0.2" />
     <param name="/move_base/local_costmap/inflation_layer/inflation_raduis" value="0.2" />
     <param name="/move_base/global_costmap/robot_raduis" value="0.15" />
     <param name="/move_base/local_costmap/robot_radius" value="0.15" />
     <param name="slam_gmapping" value="1000" />
+
     <node name="rviz" pkg="rviz" type="rviz" args"-d (find final_project)/final.rviz" />
-    <node name="final_nav" pkg="final_project" type="navigation" />
-    
 
 
 </launch>
