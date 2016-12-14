@@ -11,7 +11,7 @@ from heapq import *
 def mapCallBack(data):
     global pubpath
     global pubgoal
-    goal = find_frontiers()
+    goal = findFrontiers()
     if(goal == False):
         print "done"
     else :
