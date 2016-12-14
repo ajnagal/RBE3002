@@ -11,7 +11,6 @@ from find_frontiers import find_frontiers
 def mapCallBack(data):
     global mapData
     global pubgoal
-    goal = findFrontiers()
     global xPosition
     global yPosition
 
@@ -21,7 +20,6 @@ def mapCallBack(data):
     myStart = (xPosition, yPosition)
 
     goal = find_frontiers(myStart, myMap, 20, 5,1)
->>>>>>> d083275e2bd2db8424a52379f1dc422903be18b5
     if(goal == False):
         print "done"
     else :
