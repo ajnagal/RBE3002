@@ -8,7 +8,9 @@ Panels:
         - /Path1
         - /GridCells1
         - /RobotModel1
+        - /Map1
         - /Map2
+        - /Pose1
         - /PointStamped1
       Splitter Ratio: 0.5
     Tree Height: 565
@@ -90,7 +92,7 @@ Visualization Manager:
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
-        Link Tree Style: ""
+        Link Tree Style: Links in Alphabetic Order
         base_footprint:
           Alpha: 1
           Show Axes: false
@@ -147,11 +149,6 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        mount_asus_xtion_pro_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         plate_bottom_link:
           Alpha: 1
           Show Axes: false
@@ -269,7 +266,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: false
       Name: Map
-      Topic: /map
+      Topic: /testmap
       Unreliable: false
       Value: false
     - Alpha: 0.7
@@ -282,13 +279,28 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.1
+      Class: rviz/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.3
+      Head Radius: 0.1
+      Name: Pose
+      Shaft Length: 1
+      Shaft Radius: 0.05
+      Shape: Arrow
+      Topic: /move_base_simple/goal
+      Unreliable: false
+      Value: true
+    - Alpha: 1
       Class: rviz/PointStamped
       Color: 204; 41; 204
       Enabled: true
       History Length: 1
       Name: PointStamped
       Radius: 0.2
-      Topic: /next_goal
+      Topic: /test
       Unreliable: false
       Value: true
   Enabled: true
@@ -307,7 +319,7 @@ Visualization Manager:
     - Class: rviz/SetInitialPose
       Topic: /initialpose
     - Class: rviz/SetGoal
-      Topic: /goal
+      Topic: /move_base_simple/goal
     - Class: rviz/PublishPoint
       Single click: true
       Topic: /clicked_point
@@ -315,22 +327,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 15.2478
+      Distance: 14.2468
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 4.16346
-        Y: 0.22102
-        Z: 0.00126076
+        X: -0.040616
+        Y: 0.00220299
+        Z: 0.00165939
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 1.45276
+      Pitch: 1.16061
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.317991
+      Yaw: 2.9134
     Saved: ~
 Window Geometry:
   Displays:
@@ -348,5 +360,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 97
-  Y: 24
+  X: 77
+  Y: 14

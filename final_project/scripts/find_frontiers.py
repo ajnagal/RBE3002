@@ -1,10 +1,17 @@
 
 import numpy, math
 from heapq import *
+from geometry_msgs.msg import Twist, Point, PointStamped
+
+def dist(cur, end):
+    dx = cur[0] - end[0]
+    dy = cur[1] - end[1]
+    return math.sqrt(dx**2 + dy**2)
 
 def find_frontiers(start, grid, wall_value, unknown_value, step):
-    print("Start is:", start)
     grid = numpy.swapaxes(grid,0,1)
+    print "start is: ", start
+    print "start val: ", grid[start[0]][start[1]]
     adj = [(0,step),(step, step),(0,-step),(step, -step),(step,0),(-step, step), (-step,0),(-step, -step)]
     gscore = {start: 0}
     pile = []
@@ -15,8 +22,7 @@ def find_frontiers(start, grid, wall_value, unknown_value, step):
     while pile: #While nodes exist in the heap (grid not fully explored
         curNode = heappop(pile)[1]
 
-        if grid[curNode[0], curNode[1]] >= unknown_value : #If the current node is the goal...
-            return curNode
+
 
         visited.add(curNode)
         for i, j in adj:
@@ -26,8 +32,12 @@ def find_frontiers(start, grid, wall_value, unknown_value, step):
                 if 0 <= neighbor[1] < grid.shape[1]:
                     #print(array[neighbor[0]][neighbor[1]])
                     #if array[neighbor[0]][neighbor[1]] == wall_value:
-                    if grid[neighbor[0]][neighbor[1]] >= wall_value or grid[neighbor[0]][neighbor[1]] == -1:
+                    if grid[neighbor[0]][neighbor[1]] >= wall_value:
                         continue
+                    elif grid[neighbor[0]][neighbor[1]] == -1:
+                        print "goal is: ", curNode
+                        print "neigh val: ", grid[neighbor[0]][neighbor[1]]
+                        return curNode
                 else:
                     # Escape if currNode is at a y wall
                     continue
@@ -42,7 +52,6 @@ def find_frontiers(start, grid, wall_value, unknown_value, step):
                 #If not calculate the neighbors values and add to heap
                 cameFrom[neighbor] = curNode
                 gscore[neighbor] = AproxGscore
-                fscore[neighbor] = AproxGscore
-                heappush(pile, (fscore[neighbor], neighbor))
+                heappush(pile, (gscore[neighbor], neighbor))
                 
     return False #If no path could be found (this can take a while)
