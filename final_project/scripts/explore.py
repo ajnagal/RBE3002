@@ -9,6 +9,7 @@ from kobuki_msgs.msg import BumperEvent
 import rospy, tf, numpy, math
 from find_frontiers import find_frontiers
 from tf.transformations import euler_from_quaternion
+from kobuki_msgs.msg import Sound
 
 def updateGrid(dataPack):
     global mapData
@@ -42,7 +43,7 @@ def updateGrid(dataPack):
     tempwhee.data = mapData
     pubtest.publish(tempwhee)
 
-    print ("Updated!")
+    #print ("Updated!")
     #print "Len is: " + str(len(mapData))
     #for whee in mapData:
     #   if not whee == -1:
@@ -82,6 +83,7 @@ def explore():
     global mapData
     global pubgoal
     global pubdisp
+    global pubsound
     global xPosition
     global yPosition
     global width
@@ -99,7 +101,7 @@ def explore():
     myStart = (startAX, startAY)
 
     if(myMap[myStart[0]][myStart[1]] > 20):
-        radius = 3;
+        radius = 4;
         for j in range(0, 2*radius):
             for k in range(0, 2*radius):
                 myMap[myStart[0]+j-radius][myStart[1]+k-radius] = 0
@@ -107,7 +109,11 @@ def explore():
     goal = find_frontiers(myStart, myMap, 20, 5, 1)
     if(goal == False):
         print "done"
-        done = True;
+        done = True
+        snd = Sound()
+        snd.value = 6
+        pubsound.publish(snd)
+
     else :
         output = PoseStamped()
         output.header.frame_id = 'map'
@@ -180,6 +186,7 @@ def run():
     global pubpath
     global pubway
     global pubtest
+    global pubsound
     global odom_list
     global done
 
@@ -198,6 +205,7 @@ def run():
     pubgoal = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=1)
     pubdisp = rospy.Publisher("/goal", PoseStamped, queue_size=1)
     pubtest = rospy.Publisher("/testmap", OccupancyGrid, queue_size=1)
+    pubsound = rospy.Publisher("/mobile_base/commands/sound", Sound, queue_size=1)
     sub = rospy.Subscriber("/move_base/global_costmap/costmap", OccupancyGrid, mapCallBack)
     subUp = rospy.Subscriber("/move_base/global_costmap/costmap_updates", OccupancyGridUpdate, updateGrid)
     #start_sub = rospy.Subscriber('/lab4_pose', Point, readStart, queue_size=1) #change topic for best results
